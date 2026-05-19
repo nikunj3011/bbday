@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Bday Bday</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:
+        radial-gradient(circle at center, #2b003d 0%, #050505 70%);
+    font-family:Arial, Helvetica, sans-serif;
+    height:100vh;
+    color:white;
+}
+
+/* ===========================
+   THREE CANVAS
+=========================== */
+
+#bg{
+    position:fixed;
+    inset:0;
+    z-index:1;
+}
+
+/* ===========================
+   OVERLAY
+=========================== */
+
+.overlay{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:10;
+    pointer-events:none;
+}
+
+.title{
+    position:absolute;
+    top:40px;
+    font-size:3rem;
+    font-weight:bold;
+
+    background:linear-gradient(
+        90deg,
+        #fff,
+        #ff73d1,
+        #00eaff,
+        #fff
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:
+        0 0 10px white,
+        0 0 20px #ff73d1;
+
+    animation:titleFloat 3s ease-in-out infinite;
+}
+
+@keyframes titleFloat{
+    0%{ transform:translateY(0px); }
+    50%{ transform:translateY(-10px); }
+    100%{ transform:translateY(0px); }
+}
+
+/* ===========================
+   BIG BUTTON
+=========================== */
+
+.main-btn{
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    border:none;
+    cursor:pointer;
+    pointer-events:auto;
+    position:relative;
+    overflow:hidden;
+
+    background:
+        radial-gradient(circle at 30% 30%,
+        #ffffff,
+        #ff4da6 30%,
+        #7b2cff 70%);
+
+    box-shadow:
+        0 0 20px #ff4da6,
+        0 0 50px #ff4da6,
+        0 0 100px rgba(255,77,166,.9);
+
+    transition:all .15s ease;
+
+    animation:pulse 1.6s infinite;
+}
+
+.main-btn:hover{
+    transform:scale(1.05);
+}
+
+.main-btn:active{
+    transform:scale(.92);
+}
+
+.main-btn::before{
+    content:"";
+    position:absolute;
+    inset:-30%;
+
+    background:conic-gradient(
+        transparent,
+        rgba(255,255,255,.9),
+        transparent
+    );
+
+    animation:spin 2s linear infinite;
+}
+
+.main-btn span{
+    position:relative;
+    z-index:5;
+    font-size:1.6rem;
+    color:white;
+    font-weight:bold;
+    text-shadow:0 0 20px white;
+}
+
+@keyframes spin{
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(360deg); }
+}
+
+@keyframes pulse{
+    0%{
+        transform:scale(1);
+    }
+    50%{
+        transform:scale(1.08);
+    }
+    100%{
+        transform:scale(1);
+    }
+}
+
+/* ===========================
+   COUNTER
+=========================== */
+
+.counter{
+    margin-top:25px;
+    font-size:1.2rem;
+    letter-spacing:1px;
+
+    text-shadow:
+        0 0 10px white,
+        0 0 20px #00eaff;
+}
+
+/* ===========================
+   PARTICLE OVERLAYS
+=========================== */
+
+.overlay-container{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:6;
+}
+
+.firework{
+    position:absolute;
+    object-fit:contain;
+
+    animation:floatExplode 2.5s linear forwards;
+
+    mix-blend-mode:screen;
+
+    filter:
+        brightness(1.4)
+        drop-shadow(0 0 15px white)
+        drop-shadow(0 0 25px #ff4da6);
+}
+
+.layer-far{
+    opacity:.4;
+    filter:blur(2px);
+}
+
+.layer-mid{
+    opacity:.7;
+}
+
+.layer-near{
+    opacity:1;
+}
+
+@keyframes floatExplode{
+
+    0%{
+        transform:
+            translateY(120px)
+            scale(.4)
+            rotate(0deg);
+
+        opacity:0;
+    }
+
+    15%{
+        opacity:1;
+    }
+
+    100%{
+        transform:
+            translateY(-300px)
+            scale(1.7)
+            rotate(360deg);
+
+        opacity:0;
+    }
+}
+
+/* ===========================
+   FINAL SCREEN
+=========================== */
+
+.final-screen{
+    position:fixed;
+    inset:0;
+    z-index:50;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+
+    background:rgba(0,0,0,.72);
+    backdrop-filter:blur(12px);
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:1.5s;
+}
+
+.final-screen.show{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.final-media{
+    width:min(75vw, 520px);
+
+    border-radius:30px;
+
+    box-shadow:
+        0 0 30px white,
+        0 0 80px #ff4da6,
+        0 0 140px #00eaff;
+
+    animation:finalFloat 3s ease-in-out infinite;
+}
+
+@keyframes finalFloat{
+    0%{ transform:translateY(0px); }
+    50%{ transform:translateY(-12px); }
+    100%{ transform:translateY(0px); }
+}
+
+.final-text{
+    margin-top:35px;
+
+    font-size:4rem;
+    font-weight:bold;
+    text-align:center;
+
+    background:linear-gradient(
+        90deg,
+        #fff,
+        #ffe066,
+        #ff4da6,
+        #00eaff,
+        #fff
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:
+        0 0 20px white,
+        0 0 40px #ff4da6;
+
+    animation:textGlow 2s infinite alternate;
+}
+
+@keyframes textGlow{
+    from{
+        transform:scale(1);
+        filter:brightness(1);
+    }
+
+    to{
+        transform:scale(1.04);
+        filter:brightness(1.5);
+    }
+}
+
+.instructions{
+    position:fixed;
+    bottom:18px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:15;
+    opacity:.85;
+    font-size:.95rem;
+}
+
+@media(max-width:700px){
+
+    .title{
+        font-size:2rem;
+    }
+
+    .main-btn{
+        width:170px;
+        height:170px;
+    }
+
+    .main-btn span{
+        font-size:1.2rem;
+    }
+
+    .final-text{
+        font-size:2.2rem;
+        padding:0 20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="overlay-container" id="overlayContainer"></div>
+
+<div class="overlay">
+
+    <div class="title">
+        Birthday Celebration ✨
+    </div>
+
+    <button class="main-btn" id="pressBtn">
+        <!-- <span>PRESS & HOLD</span> -->
+    </button>
+
+    <div class="counter" id="counter">
+        <!-- Hold for 40 seconds 🎉 -->
+    </div>
+
+</div>
+
+<div class="final-screen" id="finalScreen">
+
+    <!-- USE WEBM FOR BEST TRANSPARENT QUALITY -->
+    <img
+        id="finalMedia"
+        class="final-media"
+        src=""
+    />
+
+    <div class="final-text" id="finalText"></div>
+
+</div>
+
+<div class="instructions">
+    <!-- Hold continuously to unlock the surprise ✨ -->
+</div>
+
+<!-- THREE JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+<script>
+
+/* ======================================================
+   ================== VARIABLES ==========================
+   ====================================================== */
+
+/*
+    CHANGE THESE 3 VARIABLES
+*/
+
+/* Transparent Firework Overlay */
+const FIREWORK_MEDIA = [
+
+    "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3o4cHh2ZXRkZW5xdjlpeWg2d2Z2c2Flb2p0Z2RweXNxaHNieHB0eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0ixAZaU8Gp8R5TdRQT/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aDZ0Zmc1NWpsZXdiZHlyOWVnYm5mczJ2cDhtNjZqczdoaWxuZmR4eiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/WXB88TeARFVvi/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTg2ajVmNzU4YWxhaHR0ZHN2ZmVnNHhibXQzazM4cTEzMnk2NG8zdSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/JIX9t2j0ZTN9S/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3ZGtwcmM5ZnVhcmxreWtnemR1OW5ocms1NnBlam1uaWI0anNqZjg1dCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/6JvVrxP6osBdC/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3OTIzYWJqOGw1eXF0anMwbmViaTgyeHd5Zmw4MHk4dHBiYnp4ZTRyNSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/u6Ggn4VrUmzVMCITjo/giphy.gif",
+    "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bW03YzhmcXVscjg4dnVtaWFvczBwcGtjaWY1b3Nmem5ubnd1Znd0dyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/0Ar2otUdwBlKAaw7Vt/giphy.gif",
+
+];
+/* Final Birthday GIF / WEBM */
+const FINAL_MEDIA =
+"https://media.giphy.com/media/g5R9dok94mrIvplmZd/giphy.gif";
+
+/* Final Birthday Text */
+const FINAL_TEXT =
+"HAPPY BIRTHDAY HETAL 😎🎂✨";
+
+
+/* =========================
+   AUDIO
+========================= */
+
+const HOLD_AUDIO =
+"sound.mp3";
+
+const FINAL_AUDIO =
+"song.mp3";
+
+
+/* ======================================================
+   ================== ELEMENTS ===========================
+   ====================================================== */
+
+const btn = document.getElementById("pressBtn");
+const counter = document.getElementById("counter");
+
+const overlayContainer =
+document.getElementById("overlayContainer");
+
+const finalScreen =
+document.getElementById("finalScreen");
+
+const finalMedia =
+document.getElementById("finalMedia");
+
+const finalText =
+document.getElementById("finalText");
+
+let isHolding = false;
+let holdStart = null;
+let finished = false;
+let interval = null;
+
+const holdAudio = new Audio(HOLD_AUDIO);
+holdAudio.loop = true;
+holdAudio.volume = .45;
+
+const finalAudio = new Audio(FINAL_AUDIO);
+finalAudio.volume = .9;
+
+
+/* ======================================================
+   ================== THREE.JS ===========================
+   ====================================================== */
+
+const canvas = document.getElementById("bg");
+
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+);
+
+camera.position.z = 35;
+
+const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha:true,
+    antialias:true
+});
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+renderer.setPixelRatio(
+    window.devicePixelRatio
+);
+
+/* ======================================
+   STAR PARTICLES
+====================================== */
+
+const particleGeometry =
+new THREE.BufferGeometry();
+
+const particleCount = 5000;
+
+const positions =
+new Float32Array(particleCount * 3);
+
+for(let i = 0; i < particleCount * 3; i++){
+
+    positions[i] =
+        (Math.random() - .5) * 180;
+}
+
+particleGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions, 3)
+);
+
+const particleMaterial =
+new THREE.PointsMaterial({
+    size:.2,
+    transparent:true,
+    opacity:.9
+});
+
+const stars =
+new THREE.Points(
+    particleGeometry,
+    particleMaterial
+);
+
+scene.add(stars);
+
+/* ======================================
+   FLOATING RINGS
+====================================== */
+
+const rings = [];
+
+for(let i = 0; i < 25; i++){
+
+    const geometry =
+    new THREE.TorusGeometry(
+        Math.random() * 2 + .5,
+        .07,
+        16,
+        100
+    );
+
+    const material =
+    new THREE.MeshBasicMaterial({
+        wireframe:true
+    });
+
+    const torus =
+    new THREE.Mesh(geometry, material);
+
+    torus.position.x =
+        (Math.random() - .5) * 70;
+
+    torus.position.y =
+        (Math.random() - .5) * 70;
+
+    torus.position.z =
+        (Math.random() - .5) * 70;
+
+    rings.push(torus);
+
+    scene.add(torus);
+}
+
+/* ======================================
+   FLOATING SPHERES
+====================================== */
+
+const spheres = [];
+
+for(let i = 0; i < 40; i++){
+
+    const geometry =
+    new THREE.SphereGeometry(
+        Math.random() * .4 + .1,
+        16,
+        16
+    );
+
+    const material =
+    new THREE.MeshBasicMaterial();
+
+    const sphere =
+    new THREE.Mesh(geometry, material);
+
+    sphere.position.x =
+        (Math.random() - .5) * 100;
+
+    sphere.position.y =
+        (Math.random() - .5) * 100;
+
+    sphere.position.z =
+        (Math.random() - .5) * 100;
+
+    spheres.push(sphere);
+
+    scene.add(sphere);
+}
+
+/* ======================================
+   ANIMATION
+====================================== */
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    stars.rotation.y += 0.0008;
+    stars.rotation.x += 0.0003;
+
+    rings.forEach((ring, index)=>{
+
+        ring.rotation.x += .005 + index * .00005;
+        ring.rotation.y += .003;
+
+    });
+
+    spheres.forEach((sphere, index)=>{
+
+        sphere.rotation.y += .01;
+
+        sphere.position.y +=
+            Math.sin(Date.now() * .001 + index)
+            * .003;
+
+    });
+
+    renderer.render(scene, camera);
+}
+
+animate();
+
+window.addEventListener("resize", ()=>{
+
+    camera.aspect =
+        window.innerWidth /
+        window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+});
+
+
+/* ======================================================
+   ================== 3D OVERLAYS ========================
+   ====================================================== */
+
+function spawnOverlay(){
+
+    const img = document.createElement("img");
+
+    img.src =
+    FIREWORK_MEDIA[
+        Math.floor(
+            Math.random() * FIREWORK_MEDIA.length
+        )
+    ];
+
+    img.className = "firework";
+
+    /* DEPTH LAYERS */
+
+    const depth = Math.random();
+
+    if(depth < .33){
+        img.classList.add("layer-far");
+    }
+    else if(depth < .66){
+        img.classList.add("layer-mid");
+    }
+    else{
+        img.classList.add("layer-near");
+    }
+
+    img.style.left =
+        Math.random() * window.innerWidth + "px";
+
+    img.style.top =
+        Math.random() * window.innerHeight + "px";
+
+    img.style.width =
+        80 + Math.random() * 170 + "px";
+
+    // img.style.transform =
+    //     `rotate(${Math.random() * 360}deg)`;
+
+    overlayContainer.appendChild(img);
+
+    setTimeout(()=>{
+        img.remove();
+    }, 2500);
+}
+
+
+/* ======================================================
+   ================== HOLD LOGIC =========================
+   ====================================================== */
+
+function startHold(){
+
+    if(finished) return;
+
+    isHolding = true;
+
+    holdStart = Date.now();
+
+    holdAudio.currentTime = 0;
+    holdAudio.play();
+
+    interval = setInterval(()=>{
+
+        for(let i = 0; i < 2; i++){
+
+            setTimeout(()=>{
+                spawnOverlay();
+            }, i * 80);
+        }
+
+        /* SPEED BOOST */
+
+        stars.rotation.y += .02;
+
+        rings.forEach(ring=>{
+            ring.rotation.x += .05;
+        });
+
+        const seconds =
+            Math.floor(
+                (Date.now() - holdStart) / 1000
+            );
+
+        counter.innerHTML =
+            ``;
+            // `Hold Time: ${seconds}s / 40s`;
+
+        if(seconds >= 60){
+
+            finishCelebration();
+        }
+
+    }, 180);
+}
+
+function stopHold(){
+
+    if(finished) return;
+
+    clearInterval(interval);
+
+    holdAudio.pause();
+
+    counter.innerHTML =
+        "🎉";
+}
+
+
+/* ======================================================
+   ================== FINAL ==============================
+   ====================================================== */
+
+function finishCelebration(){
+
+    finished = true;
+
+    clearInterval(interval);
+
+    holdAudio.pause();
+
+    finalMedia.src = FINAL_MEDIA;
+
+    finalText.innerHTML = FINAL_TEXT;
+
+    finalScreen.classList.add("show");
+
+    finalAudio.play();
+
+    /* MASSIVE FIREWORK BLAST */
+
+    for(let i = 0; i < 4; i++){
+
+        setTimeout(()=>{
+
+            spawnOverlay();
+
+        }, i * 15);
+    }
+
+    /* CAMERA PUSH */
+
+    let zoom = 35;
+
+    const zoomInterval = setInterval(()=>{
+
+        zoom -= .2;
+
+        camera.position.z = zoom;
+
+        if(zoom <= 20){
+
+            clearInterval(zoomInterval);
+        }
+
+    }, 16);
+}
+
+
+/* ======================================================
+   ================== EVENTS =============================
+   ====================================================== */
+
+/* DESKTOP */
+
+btn.addEventListener("mousedown", startHold);
+
+window.addEventListener("mouseup", ()=>{
+
+    stopHold();
+});
+
+/* MOBILE */
+
+btn.addEventListener("touchstart", (e)=>{
+
+    e.preventDefault();
+
+    startHold();
+});
+
+window.addEventListener("touchend", ()=>{
+
+    stopHold();
+});
+
+</script>
+
+</body>
+</html>
